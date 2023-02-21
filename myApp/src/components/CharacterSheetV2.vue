@@ -1,0 +1,192 @@
+<template>
+  <div class="frame">
+    <div class="fade"></div>
+    <img id="portrait" :src="currentCharacter.imgUrl" alt="No character picture found!" class="charImg">
+  </div>
+  <ion-row class="infoArea">
+    <ion-col>
+      <ion-item size="7" class="input nameField">
+        <ion-label class="label" color="medium" position="stacked">Name</ion-label>
+        <ion-input class="characterInput" v-model="currentCharacter.name" ref="input" type="text"></ion-input>
+      </ion-item>
+
+      <ion-row>
+        <ion-col size="7" class="col">
+          <ion-item class="input">
+            <ion-label class="label" color="medium" position="stacked">Height</ion-label>
+            <ion-input v-model="currentCharacter.height" type="text"></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="5" class="col">
+          <ion-item class="input">
+            <ion-label class="label" color="medium" position="stacked">Age</ion-label>
+            <ion-input v-model="currentCharacter.age" type="text"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-item class="input">
+        <ion-label class="label" color="medium" position="stacked">Gender</ion-label>
+        <ion-input v-model="currentCharacter.gender" type="text"></ion-input>
+      </ion-item>
+
+      <ion-row>
+        <ion-col size="6" class="col">
+          <ion-item class="input">
+            <ion-label class="label" color="medium" position="stacked">Physique</ion-label>
+            <ion-input v-model="currentCharacter.physique" type="text"></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="6" class="col">
+          <ion-item class="input">
+            <ion-label class="label" color="medium" position="stacked">Profession</ion-label>
+            <ion-input v-model="currentCharacter.profession" type="text"></ion-input>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+
+      <ion-item class="input">
+        <ion-label class="label" color="medium" position="stacked">Description</ion-label>
+        <ion-textarea :auto-grow="true" v-model="currentCharacter.description" type="text"></ion-textarea>
+      </ion-item>
+
+      <ion-item class="input">
+        <ion-label class="label" color="medium" position="stacked">Img-URL</ion-label>
+        <ion-input v-model="currentCharacter.imgUrl" type="text"></ion-input>
+      </ion-item>
+    </ion-col>
+  </ion-row>
+
+  <ion-content style="display: none">
+    <AttributeList :name="'Attributes'" :list="currentCharacter.attributes" :type-level="null" :editLevel="false"></AttributeList>
+  </ion-content>
+
+  <ion-fab class="fab" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="danger" @click="$emit('create')">
+      <ion-icon id="fabIcon" :icon="bookOutline" ></ion-icon>
+      <IonIcon :icon="brushOutline" class="penIcon" ></IonIcon>
+    </ion-fab-button>
+  </ion-fab>
+</template>
+
+<script>
+import {
+  IonCol, IonContent,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonRow,
+  IonTextarea
+} from "@ionic/vue";
+import AttributeList from "@/components/AttributeList";
+import {useCharacterStore} from "@/stores/characters";
+import { bookOutline, brushOutline } from "ionicons/icons";
+
+
+export default {
+  name: "CharacterSheet",
+  components: {
+    IonItem,
+    IonLabel,
+    IonInput,
+    IonCol,
+    IonRow,
+    IonTextarea,
+    AttributeList,
+    IonFab,
+    IonFabButton,
+    IonIcon,
+    IonContent
+  },
+  props: {
+    currentCharacterInput: Object
+  },
+  data () {
+    return {
+      currentCharacter: {},
+      attributesReady: false,
+      imgUrl: 'https://i.pinimg.com/236x/2d/16/71/2d1671a4e725a28c99ef4b619af8a839.jpg'
+    }
+  },
+  emits: [
+      'create'
+  ],
+  watch: {
+    currentCharacterInput(newCharacter) {
+      this.currentCharacter = newCharacter
+    }
+  },
+  mounted() {
+    this.currentCharacter = this.currentCharacterInput;
+  },
+  setup () {
+    const characterStore = useCharacterStore;
+    return {
+      characterStore,
+      bookOutline,
+      brushOutline
+    }
+  }
+}
+</script>
+
+<style scoped>
+:root {
+  --new-background: #26151D;
+}
+
+.input {
+  margin: 0 10px 20px 10px;
+  border-radius: 10px;
+}
+.col {
+  padding: 0;
+}
+.fab {
+  margin-bottom: 8vh;
+}
+.penIcon{
+  margin-left: 20px;
+  margin-bottom: 15px;
+  position: absolute;
+  font-size: 20px;
+}
+.charImg{
+  position: relative;
+  width: 100%;
+  max-height: 60%;
+  object-fit: cover;
+  z-index: -1;
+}
+.fade {
+  height: 100%;
+  width: 100%;
+  position:absolute;
+  background: -webkit-linear-gradient(top,
+  rgba(var(--ion-background-color-rgb), 0) 0%,
+  rgba(var(--ion-background-color-rgb), 0) 20%,
+  rgba(var(--ion-background-color-rgb), 0.7) 80%,
+  rgba(var(--ion-background-color-rgb), 1) 100%
+  );
+}
+.frame {
+  height: 100%;
+  position: relative;
+}
+.infoArea{
+  position: relative;
+  border-radius: 28px;
+  width: 100%;
+  margin-top: -40px;
+  z-index: 2;
+}
+.nameField{
+  margin-top: 5px;
+}
+
+</style>

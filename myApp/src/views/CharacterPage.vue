@@ -2,9 +2,10 @@
   <ion-page>
     <ion-content>
       <div v-if="character !== null">
-        <top-bar @openMenu="openMenu" :attribute-points="0" class="front" @buttonClicked="editable = !editable"></top-bar>
+        <!--<top-bar @openMenu="openMenu" :attribute-points="0" class="front" @buttonClicked="editable = !editable"></top-bar>-->
 
-        <CharacterSheet @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheet>
+        <!--<CharacterSheet @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheet>-->
+        <CharacterSheetV2 @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheetV2>
       </div>
 
       <div v-else>
@@ -38,7 +39,6 @@
 </template>
 
 <script lang="ts">
-import TopBar from "@/components/TopBar.vue";
 import {
   IonButton,
   IonContent,
@@ -56,7 +56,7 @@ import {
   toastController
 } from "@ionic/vue";
 import {addCircleOutline} from "ionicons/icons";
-import CharacterSheet from "@/components/CharacterSheet.vue";
+import CharacterSheetV2 from "@/components/CharacterSheetV2.vue";
 import {DataController} from "@/stores/DataController";
 import {defineComponent} from "vue";
 import {Character} from "@/model/Character";
@@ -65,7 +65,6 @@ export default defineComponent({
   name: "CharacterPage",
   components: {
     IonRouterOutlet,
-    TopBar,
     IonLabel,
     IonButton,
     IonPage,
@@ -75,7 +74,7 @@ export default defineComponent({
     IonToolbar,
     IonTitle,
     IonContent,
-    CharacterSheet,
+    CharacterSheetV2,
     IonList,
     IonItem
   },
