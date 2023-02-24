@@ -1,11 +1,11 @@
 <template>
   <ion-page>
-    <ion-content>
-      <div v-if="character !== null">
+    <ion-content style="max-height: 95%">
+      <div v-if="character.id !== 999">
         <!--<top-bar @openMenu="openMenu" :attribute-points="0" class="front" @buttonClicked="editable = !editable"></top-bar>-->
 
         <!--<CharacterSheet @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheet>-->
-        <CharacterSheetV2 @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheetV2>
+        <CharacterSheetV2 @menu="openMenu" @create="saveCharacter" @delete="controlWarning()" :current-character-input="character"></CharacterSheetV2>
       </div>
 
       <div v-else>
@@ -33,6 +33,15 @@
         </ion-content>
       </ion-menu>
 
+      <ion-alert
+          :is-open="warningOpen"
+          :header="'Delete '+ this.character.name + '?'"
+          message="Do you want to delete this character?"
+          :buttons="[{text: 'Confirm', role:'confirm', handler: () => {this.controlWarning(true)}},
+                     {text: 'Cancel', role:'cancel'}]"
+          @didDismiss="controlWarning()"
+      ></ion-alert>
+
       <ion-router-outlet v-if="menuOpen" id="menuOutlet"></ion-router-outlet>
     </ion-content>
   </ion-page>
@@ -53,7 +62,7 @@ import {
   IonToolbar,
   IonRouterOutlet,
   menuController,
-  toastController
+  toastController, IonAlert
 } from "@ionic/vue";
 import {addCircleOutline} from "ionicons/icons";
 import CharacterSheetV2 from "@/components/CharacterSheetV2.vue";
@@ -76,7 +85,8 @@ export default defineComponent({
     IonContent,
     CharacterSheetV2,
     IonList,
-    IonItem
+    IonItem,
+    IonAlert
   },
   data () {
     return {
@@ -84,6 +94,7 @@ export default defineComponent({
       character: new Character(15,'', '', 0, '', '', 0,'','') as Character,
       editable: false,
       menuOpen: false,
+      warningOpen: false
     }
   },
   methods: {
@@ -105,10 +116,15 @@ export default defineComponent({
     },
     async getCurrentCharacter () {
       const character: Character = await this.dataController.getCurrentCharacter() as Character;
+      if (character === null) await this.changeCharacters(0)
       this.character = character;
     },
     async getCharacters () {
       this.characters = await this.dataController.getCharacters() as Character[];
+    },
+    async removeCharacter () {
+      await this.dataController.removeCharacter()
+      await this.changeCharacters(0)
     },
 
     //UI
@@ -118,7 +134,7 @@ export default defineComponent({
     },
     closeMenu () {
       menuController.toggle();
-      setTimeout(() => this.menuOpen = !this.menuOpen,300);
+      setTimeout(() => this.menuOpen = false,300);
     },
     async openToast() {
       const toast = await toastController
@@ -128,8 +144,13 @@ export default defineComponent({
           })
       return toast.present();
     },
+    controlWarning(canDelete = false) {
+      if (canDelete === false) this.warningOpen = !this.warningOpen
+      if (canDelete) this.removeCharacter()
+    }
   },
   mounted() {
+    console.log(this.menuOpen)
     this.getCurrentCharacter();
     this.getCharacters();
   },

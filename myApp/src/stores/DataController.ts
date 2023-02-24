@@ -13,13 +13,15 @@ export class DataController {
     //Character Methods
     public async getCurrentCharacter(): Promise<Character> {
         const index: number = JSON.parse(await this.store.get('currentId'))
-        const character: Character = JSON.parse(await this.store.get('Character' + index)) as Character;
+        let character: Character = JSON.parse(await this.store.get('Character' + index)) as Character;
+        if (character === null) character = new Character(999,'', '', 0, '', '', 0,'','') as Character
 
         return character;
     }
     public async changeCurrentCharacter(index: number) {
-        const character: Character = JSON.parse(await this.store.get('Character' + index)) as Character;
+        let character: Character = JSON.parse(await this.store.get('Character' + index)) as Character;
         await this.store.set('currentId', index)
+        if (character === null) character = new Character(999,'', '', 0, '', '', 0,'','') as Character
         return character;
     }
     public async getCharacters () {
@@ -40,8 +42,11 @@ export class DataController {
         return character;
     }
     public async saveCharacter(character: Character) {
+        await this.store.set('Character' + character.id, JSON.stringify(character))
+    }
+    public async removeCharacter() {
         const index: number = JSON.parse(await this.store.get('currentId'))
-        await this.store.set('Character' + index, JSON.stringify(character))
+        await this.store.remove('Character' + index)
     }
     private async getFreeSlot () {
         const characters: Character[] = await this.getCharacters();
@@ -53,6 +58,7 @@ export class DataController {
         }
         return characters.length
     }
+
 
     // Attribute Methods
     public async createAttribute(attribute: Attribute) {

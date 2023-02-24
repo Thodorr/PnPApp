@@ -1,7 +1,19 @@
 <template>
   <div class="frame">
-    <div class="fade"></div>
-    <img id="portrait" :src="currentCharacter.imgUrl" alt="No character picture found!" class="charImg">
+    <div class="fade" v-on:click="showUrl = !showUrl"></div>
+    <img id="portrait" :src="currentCharacter.imgUrl" alt="No character picture found!" onerror="this.src='https://cdn.pixabay.com/photo/2014/06/24/17/34/silhouette-376538_960_720.jpg'" class="charImg">
+    <Transition>
+      <ion-item v-if="showUrl" class="input srcInput" color="none" lines="none">
+        <ion-label class="label" color="medium" position="stacked">Img-URL</ion-label>
+        <ion-input v-model="currentCharacter.imgUrl" type="text"></ion-input>
+      </ion-item>
+    </Transition>
+    <button @click="$emit('menu')" class="characterButton">
+      <ion-icon :icon="peopleOutline"></ion-icon>
+    </button>
+    <button @click="$emit('delete')" style="margin-bottom: 50px" class="characterButton">
+      <ion-icon :icon="trashOutline"></ion-icon>
+    </button>
   </div>
   <ion-row class="infoArea">
     <ion-col>
@@ -11,25 +23,27 @@
       </ion-item>
 
       <ion-row>
-        <ion-col size="7" class="col">
+        <ion-col size="4" class="col">
+          <ion-item class="input">
+            <ion-label class="label" color="medium" position="stacked">Gender</ion-label>
+            <ion-input v-model="currentCharacter.gender" type="text"></ion-input>
+          </ion-item>
+        </ion-col>
+
+        <ion-col size="4" class="col">
           <ion-item class="input">
             <ion-label class="label" color="medium" position="stacked">Height</ion-label>
             <ion-input v-model="currentCharacter.height" type="text"></ion-input>
           </ion-item>
         </ion-col>
 
-        <ion-col size="5" class="col">
+        <ion-col size="4" class="col">
           <ion-item class="input">
             <ion-label class="label" color="medium" position="stacked">Age</ion-label>
             <ion-input v-model="currentCharacter.age" type="text"></ion-input>
           </ion-item>
         </ion-col>
       </ion-row>
-
-      <ion-item class="input">
-        <ion-label class="label" color="medium" position="stacked">Gender</ion-label>
-        <ion-input v-model="currentCharacter.gender" type="text"></ion-input>
-      </ion-item>
 
       <ion-row>
         <ion-col size="6" class="col">
@@ -51,42 +65,24 @@
         <ion-label class="label" color="medium" position="stacked">Description</ion-label>
         <ion-textarea :auto-grow="true" v-model="currentCharacter.description" type="text"></ion-textarea>
       </ion-item>
-
-      <ion-item class="input">
-        <ion-label class="label" color="medium" position="stacked">Img-URL</ion-label>
-        <ion-input v-model="currentCharacter.imgUrl" type="text"></ion-input>
-      </ion-item>
+      <ion-button class="input" @click="$emit('create')" color="danger"  expand="block">Save</ion-button>
     </ion-col>
   </ion-row>
-
-  <ion-content style="display: none">
-    <AttributeList :name="'Attributes'" :list="currentCharacter.attributes" :type-level="null" :editLevel="false"></AttributeList>
-  </ion-content>
-
-  <ion-fab class="fab" vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button color="danger" @click="$emit('create')">
-      <ion-icon id="fabIcon" :icon="bookOutline" ></ion-icon>
-      <IonIcon :icon="brushOutline" class="penIcon" ></IonIcon>
-    </ion-fab-button>
-  </ion-fab>
 </template>
 
 <script>
 import {
-  IonCol, IonContent,
-  IonFab,
-  IonFabButton,
+  IonCol,
   IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonRow,
-  IonTextarea
+  IonTextarea,
+  IonButton
 } from "@ionic/vue";
-import AttributeList from "@/components/AttributeList";
 import {useCharacterStore} from "@/stores/characters";
-import { bookOutline, brushOutline } from "ionicons/icons";
-
+import {bookOutline, brushOutline, peopleOutline, trashOutline} from "ionicons/icons";
 
 export default {
   name: "CharacterSheet",
@@ -97,11 +93,8 @@ export default {
     IonCol,
     IonRow,
     IonTextarea,
-    AttributeList,
-    IonFab,
-    IonFabButton,
     IonIcon,
-    IonContent
+    IonButton
   },
   props: {
     currentCharacterInput: Object
@@ -110,11 +103,14 @@ export default {
     return {
       currentCharacter: {},
       attributesReady: false,
-      imgUrl: 'https://i.pinimg.com/236x/2d/16/71/2d1671a4e725a28c99ef4b619af8a839.jpg'
+      imgUrl: 'https://i.pinimg.com/236x/2d/16/71/2d1671a4e725a28c99ef4b619af8a839.jpg',
+      showUrl: false
     }
   },
   emits: [
-      'create'
+      'create',
+      'menu',
+      'delete'
   ],
   watch: {
     currentCharacterInput(newCharacter) {
@@ -129,7 +125,9 @@ export default {
     return {
       characterStore,
       bookOutline,
-      brushOutline
+      brushOutline,
+      peopleOutline,
+      trashOutline
     }
   }
 }
@@ -138,6 +136,16 @@ export default {
 <style scoped>
 :root {
   --new-background: #26151D;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: all 0.3s ease-out;
+}
+.v-enter-from,
+.v-leave-to {
+  transform: translateY(-40px);
+  opacity: 0;
 }
 
 .input {
@@ -174,6 +182,24 @@ export default {
   rgba(var(--ion-background-color-rgb), 1) 100%
   );
 }
+.characterButton {
+  height: 40px;
+  width: 40px;
+  bottom: 60px;
+  right: 20px;
+  border-radius: 50px;
+  position:absolute;
+  background-color: rgba(0,0,0,0)!important;
+  backdrop-filter: blur(60px)!important;
+}
+.srcInput {
+  position:absolute;
+  top: 10%;
+  width: 95%;
+  background-color: rgba(0,0,0,0)!important;
+  backdrop-filter: blur(6px)!important;
+}
+
 .frame {
   height: 100%;
   position: relative;
@@ -187,6 +213,20 @@ export default {
 }
 .nameField{
   margin-top: 5px;
+}
+@media (prefers-color-scheme: light) {
+  .input {
+    box-shadow: 0.7px 0.7px 2.5px;
+  }
+  .infoArea{
+    position: relative;
+    border-radius: 28px;
+    width: 100%;
+    margin-top: -40px;
+    padding-top: 5px;
+    z-index: 2;
+    background-color: white;
+  }
 }
 
 </style>
