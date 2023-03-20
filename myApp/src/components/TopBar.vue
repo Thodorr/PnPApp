@@ -61,7 +61,7 @@ export default {
       }
     },
     title () {
-      const stringTitle = this.currentRoute.slice(1)
+      const stringTitle = this.currentRoute.slice(1, this.currentRoute.length-2)
       return stringTitle;
     }
   },

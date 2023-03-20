@@ -1,7 +1,7 @@
 <template>
   <ion-app>
     <ion-router-outlet />
-    <TabBar :current-route="currentRoute"></TabBar>
+    <TabBar v-if="currentRoute !== '/Selection'" :current-route="currentRoute"></TabBar>
   </ion-app>
 </template>
 

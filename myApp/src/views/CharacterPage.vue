@@ -1,18 +1,11 @@
 <template>
   <ion-page>
     <ion-content style="max-height: 95%">
-      <div v-if="character.id !== 999">
+      <div>
         <!--<top-bar @openMenu="openMenu" :attribute-points="0" class="front" @buttonClicked="editable = !editable"></top-bar>-->
 
         <!--<CharacterSheet @create="saveCharacter" :current-character-input="character" :editable="editable"></CharacterSheet>-->
         <CharacterSheetV2 @menu="openMenu" @create="saveCharacter" @delete="controlWarning()" :current-character-input="character"></CharacterSheetV2>
-      </div>
-
-      <div v-else>
-        <ion-label>No Characters</ion-label>
-        <ion-button fill="clear" color="danger" @click="addCharacter">
-          <ion-icon :icon="addCircleOutline"></ion-icon>
-        </ion-button>
       </div>
 
       <ion-menu @ion-did-close="menuOpen=false" v-if="menuOpen" id="menu" menu-id="menu" side="start" content-Id="menuOutlet">
@@ -62,13 +55,14 @@ import {
   IonToolbar,
   IonRouterOutlet,
   menuController,
-  toastController, IonAlert
+  IonAlert, useIonRouter
 } from "@ionic/vue";
 import {addCircleOutline} from "ionicons/icons";
 import CharacterSheetV2 from "@/components/CharacterSheetV2.vue";
 import {DataController} from "@/stores/DataController";
 import {defineComponent} from "vue";
 import {Character} from "@/model/Character";
+import router from "@/router";
 
 export default defineComponent({
   name: "CharacterPage",
@@ -97,6 +91,9 @@ export default defineComponent({
       warningOpen: false
     }
   },
+  props: {
+    id: String
+  },
   methods: {
     // Data
     async changeCharacters (index: number) {
@@ -112,10 +109,14 @@ export default defineComponent({
     async saveCharacter () {
       await this.dataController.saveCharacter(this.character);
       await this.getCharacters();
-      await this.openToast();
     },
     async getCurrentCharacter () {
-      const character: Character = await this.dataController.getCurrentCharacter() as Character;
+      if (this.id === undefined) return
+      if (this.id === 'new') {
+        await this.addCharacter()
+        return
+      }
+      const character: Character = await this.dataController.getCharacterById(Number(this.id)) as Character;
       if (character === null) await this.changeCharacters(0)
       this.character = character;
     },
@@ -129,37 +130,38 @@ export default defineComponent({
 
     //UI
     openMenu () {
+      this.router.navigate('/Selection', "back", "pop")
+      /*
       this.menuOpen = !this.menuOpen;
       setTimeout(() => menuController.toggle());
+      */
     },
     closeMenu () {
       menuController.toggle();
       setTimeout(() => this.menuOpen = false,300);
     },
-    async openToast() {
-      const toast = await toastController
-          .create({
-            message: 'Character saved',
-            duration: 800
-          })
-      return toast.present();
-    },
     controlWarning(canDelete = false) {
-      if (canDelete === false) this.warningOpen = !this.warningOpen
+      if (!canDelete) this.warningOpen = !this.warningOpen
       if (canDelete) this.removeCharacter()
+    },
+  },
+  computed: {
+    currentRoute () {
+      return router.currentRoute.value.path
     }
   },
   mounted() {
-    console.log(this.menuOpen)
     this.getCurrentCharacter();
     this.getCharacters();
   },
   setup () {
     const dataController = new DataController();
+    const router = useIonRouter();
 
     return {
       addCircleOutline,
-      dataController
+      dataController,
+      router
     }
   },
 });

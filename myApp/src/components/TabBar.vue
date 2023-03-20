@@ -1,34 +1,34 @@
 <template>
-  <ion-tab-bar class="tabBar">
+  <div class="tabBar">
     <div class="deplacer">
-      <ion-button router-link="/Character" fill="clear" class="barButton" :class="{clicked: currentRoute === '/Character'}">
+      <ion-button @click="routeStackless('/Character/' + characterId)" shape="round" fill="clear" class="barButton" :class="{clicked: currentRoute.includes('/Character')}">
         <div>
           <ion-icon class="tabIcon" :icon="person"></ion-icon> <br>
           <ion-label class="tabText">Character</ion-label>
         </div>
       </ion-button>
-      <ion-button router-link="/Attributes" fill="clear" class="barButton" :class="{clicked: currentRoute === '/Attributes'}">
+      <ion-button @click="routeStackless('/Attributes/' + characterId)" shape="round" fill="clear" class="barButton" :class="{clicked: currentRoute.includes('/Attributes')}">
         <div>
           <ion-icon class="tabIcon" :icon="library"></ion-icon> <br>
           <ion-label class="tabText">Attributes</ion-label>
         </div>
       </ion-button>
-      <ion-button router-link="/Inventory" fill="clear" class="barButton" :class="{clicked: currentRoute === '/Inventory'}"><div>
+      <ion-button @click="routeStackless('/Inventory/' + characterId)" shape="round" fill="clear" class="barButton" :class="{clicked: currentRoute.includes('/Inventory')}"><div>
         <ion-icon class="tabIcon" :icon="diamond"></ion-icon> <br>
         <ion-label class="tabText">Inventory</ion-label>
       </div></ion-button>
     </div>
-  </ion-tab-bar>
+  </div>
 </template>
 
 <script>
-import {IonButton, IonIcon, IonLabel, IonTabBar} from "@ionic/vue";
+import {IonButton, IonIcon, IonLabel} from "@ionic/vue";
 import { person, man, library, diamond } from "ionicons/icons";
+import {useRouter} from "vue-router";
 
 export default {
   name: "TabBar",
   components: {
-    IonTabBar,
     IonButton,
     IonIcon,
     IonLabel,
@@ -36,12 +36,25 @@ export default {
   props: {
     currentRoute: String
   },
+  computed: {
+    characterId () {
+      return this.currentRoute.slice(this.currentRoute.length-1, this.currentRoute.length)
+    }
+  },
+  methods: {
+    routeStackless (route) {
+      this.router.replace(route)
+    }
+  },
   setup() {
+    const router = useRouter()
+
     return {
       person,
       man,
       library,
-      diamond
+      diamond,
+      router
     };
   }
 }
@@ -55,16 +68,18 @@ export default {
   bottom: 0;
   right: 0;
   box-shadow: 0 0 5px 0px #888888;
+  background-color: var(--ion-item-background);
 }
 .deplacer {
-  margin-left: 2vh;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
 }
 .barButton {
-  margin-left: 0.7vh;
-  margin-right: 0.7vh;
-  height: 20vh;
-  flex-flow: column;
+  height: 6vh;
   color: grey;
+  flex-basis: auto;
+  min-width: 80px;
 }
 .clicked {
   color: red;

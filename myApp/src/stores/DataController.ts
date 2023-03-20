@@ -18,6 +18,10 @@ export class DataController {
 
         return character;
     }
+    public async getCharacterById(id: number): Promise<Character> {
+        const character: Character = JSON.parse(await this.store.get('Character' + id)) as Character;
+        return character;
+    }
     public async changeCurrentCharacter(index: number) {
         let character: Character = JSON.parse(await this.store.get('Character' + index)) as Character;
         await this.store.set('currentId', index)
@@ -39,6 +43,7 @@ export class DataController {
         const slot: number = await this.getFreeSlot();
         const character: Character = new Character(slot, '', '', 0, '', '', 0, '',
             'https://cdn.pixabay.com/photo/2014/06/24/17/34/silhouette-376538_960_720.jpg');
+        await this.store.set('currentId', slot)
         return character;
     }
     public async saveCharacter(character: Character) {
